@@ -3,7 +3,7 @@ library(ggplot2)
 library(lubridate)
 library(lrequire)
 
-setwd('~/Code/R/AppleHealthData')
+setwd('~/Code/R/dashboard-development-in-r')
 df <- lrequire(apple_health_data, force.reload = F)
 str(df)
 
