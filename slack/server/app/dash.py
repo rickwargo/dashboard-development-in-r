@@ -12,7 +12,7 @@ def send_image(filename):
 
 @app.route('/dash', methods=['POST'])
 def dashboard():
-    if request.form.get('token') != 'lZbzdW6GJvfhXbkHhdn9L4GT':
+    if request.form.get('token') != 'YOURTOKENHERE':
         return None
 
     channel = request.form.get('channel_name')
