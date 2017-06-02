@@ -1,0 +1,95 @@
+---
+title: "Apple Health Data"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(lubridate)
+library(formattable)
+library(lrequire)
+
+df <- lrequire(apple_health_data, force.reload = F)
+```
+
+Steps Overview
+=====================================
+
+Row 
+-------------------------------------
+### Your Customized Health Data Report for the Period ending **`r format(Sys.Date(), "%A, %B %d, %Y")`**.
+
+The following table average step count per day per month, as well as quartile information.
+
+Row
+-------------------------------------
+### **Steps**
+
+```{r echo=FALSE}
+t <- df$steps %>%
+  group_by(date,period) %>%
+  summarize(steps=sum(value)) %>%
+  group_by(period) %>%
+  summarize(mean = round(mean(steps), 2), sd = round(sd(steps), 2),
+            median = round(median(steps), 2), max = round(max(steps), 2),
+            min = round(min(steps), 2),`25%`= quantile(steps, probs=0.25),
+            `75%`= quantile(steps, probs=0.75))
+t[] <- lapply(t, function(col) { if(is.numeric(col)) return(format(round(col), big.mark=",")) else return(col) })
+formattable(t)
+```
+
+Monthly Performance
+=====================================
+
+Row
+-------------------------------------
+
+### **Active Energy Burned / Day**
+
+```{r echo=FALSE}
+  df$summary %>%
+    group_by(period) %>%
+    summarize(calories=mean(activeEnergyBurned), goal=round(mean(activeEnergyBurnedGoal))) %>%
+    ggplot(aes(x=period, y=calories)) +
+    # ggtitle("Active Energy Burned / Day") +
+    theme_hc() + scale_colour_hc() +
+    geom_bar(stat='identity', width=0.15, fill="red", color="red") +
+    geom_point(aes(x=period, y=goal)) +
+    geom_text(aes(y=goal, label=paste0("   ", goal), hjust=0))
+```
+
+Row
+-------------------------------------
+
+### **Exercise Time / Day**
+
+```{r echo=FALSE}
+  df$summary %>%
+    group_by(period) %>%
+    summarize(time=mean(appleExerciseTime), goal=round(mean(appleExerciseTimeGoal))) %>%
+    ggplot(aes(x=period, y=time)) +
+    # ggtitle("Exercise Time / Day") +
+    theme_hc() + scale_colour_hc() +
+    geom_bar(stat='identity', width=0.15, fill="green", color="green") +
+    geom_point(aes(x=period, y=goal)) +
+    geom_text(aes(y=goal, label=paste0("   ", goal), hjust=0))
+```
+
+### **Stand Hours / Day**
+
+```{r echo=FALSE}
+  df$summary %>%
+    group_by(period) %>%
+    summarize(hours=mean(appleStandHours), goal=round(mean(appleStandHoursGoal))) %>%
+    ggplot(aes(x=period, y=hours)) +
+    # ggtitle("Stand Hours / Day") +
+    theme_hc() + scale_colour_hc() +
+    geom_bar(stat='identity', width=0.15, fill="blue", color="blue") +
+    geom_point(aes(x=period, y=goal)) +
+    geom_text(aes(y=goal, label=paste0("   ", goal), hjust=0))
+```
+
